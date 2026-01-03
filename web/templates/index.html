@@ -136,67 +136,78 @@
           <div>
             <h2 style="margin: 0 0 10px;">3) Settings</h2>
 
-            <label>Chapter ID</label>
-            <input name="chapter" type="text" value="01" />
-            <div class="hint">Allowed: A–Z, a–z, 0–9, underscore, dash (max 40 chars).</div>
+            <div style="border-bottom: 1px solid var(--border); margin-bottom: 12px; padding-bottom: 8px;">
+              <h3 style="margin: 0 0 8px; font-size: 16px;">Video & Audio</h3>
+              <label>Chapter ID</label>
+              <input name="chapter" type="text" value="01" />
+              <div class="hint">Allowed: A–Z, a–z, 0–9, underscore, dash (max 40 chars).</div>
 
-            <label>Minutes (min length)</label>
-            <input name="minutes" type="number" value="0" min="0" />
+              <label>Minutes (min length)</label>
+              <input name="minutes" type="number" value="0" min="0" />
 
-            <label>Desired slide seconds</label>
-            <input name="desired_slide_sec" type="number" value="25" min="10" />
+              <label>Desired slide seconds</label>
+              <input name="desired_slide_sec" type="number" value="25" min="10" />
 
-            <label>BGM volume</label>
-            <input name="bgm_volume" type="number" value="0.22" step="0.01" min="0" max="1" />
+              <label>BGM volume</label>
+              <input name="bgm_volume" type="number" value="0.22" step="0.01" min="0" max="1" />
+            </div>
 
-            <label>Subtitles offset (sec)</label>
-            <input name="subs_offset_sec" type="number" value="2.85" step="0.05" min="0" />
-            <div class="hint">If subtitles are ahead, increase this number.</div>
+            <div style="border-bottom: 1px solid var(--border); margin-bottom: 12px; padding-bottom: 8px;">
+              <h3 style="margin: 0 0 8px; font-size: 16px;">TTS (Voice Clone)</h3>
+              <label>TTS (Speech) language</label>
+              <select name="tts_lang">
+                <option value="zh-cn" selected>Chinese (Mandarin)</option>
+                <option value="en">English</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="de">German</option>
+                <option value="fr">French</option>
+              </select>
+              <div class="hint">Language for the cloned voice to speak.</div>
+            </div>
 
-            <label>Subtitles source</label>
-            <select name="subs_from">
-              <option value="script" selected>Script + silence alignment (fast)</option>
-              <option value="whisper">Speech-to-text (Whisper, best match)</option>
-            </select>
-            <div class="hint">Whisper requires installing <code>requirements_stt.txt</code>.</div>
+            <div style="border-bottom: 1px solid var(--border); margin-bottom: 12px; padding-bottom: 8px;">
+              <h3 style="margin: 0 0 8px; font-size: 16px;">Subtitles</h3>
+              <label>Subtitles source</label>
+              <select name="subs_from">
+                <option value="script" selected>Script + silence alignment (fast)</option>
+                <option value="whisper">Speech-to-text (Whisper, best match)</option>
+              </select>
+              <div class="hint">Whisper requires installing <code>requirements_stt.txt</code>.</div>
 
-            <label>Subtitles model size (Whisper)</label>
-            <input name="whisper_model" type="text" value="small" />
-            <div class="hint">tiny, base, small, medium, large-v3.</div>
+              <label>Subtitles language (Whisper)</label>
+              <input name="whisper_lang" type="text" value="auto" />
+              <div class="hint">Use auto, or zh / en.</div>
 
-            <label>Subtitles language</label>
-            <input name="whisper_lang" type="text" value="auto" />
-            <div class="hint">Use auto, or zh / en.</div>
+              <label>Subtitles model size (Whisper)</label>
+              <input name="whisper_model" type="text" value="small" />
+              <div class="hint">tiny, base, small, medium, large-v3.</div>
 
-            <label>TTS (Speech) language</label>
-            <select name="tts_lang">
-              <option value="zh-cn" selected>Chinese (Mandarin)</option>
-              <option value="en">English</option>
-              <option value="ja">Japanese</option>
-              <option value="ko">Korean</option>
-              <option value="de">German</option>
-              <option value="fr">French</option>
-            </select>
-            <div class="hint">Language for the cloned voice to speak.</div>
+              <label>Subtitles offset (sec)</label>
+              <input name="subs_offset_sec" type="number" value="2.85" step="0.05" min="0" />
 
-            <label>Subtitles font size</label>
-            <input name="sub_font_size" type="number" value="16" step="1" min="10" max="72" />
+              <label>Subtitles font size</label>
+              <input name="sub_font_size" type="number" value="16" step="1" min="10" max="72" />
 
-            <label>Image style</label>
-            <select name="image_style">
-              <option value="none" selected>None (no change)</option>
-              <option value="cinematic">Cinematic</option>
-              <option value="vivid">Vivid</option>
-              <option value="bw">B&W</option>
-            </select>
+              <label>
+                <input name="burn_subs" type="checkbox" checked />
+                Burn subtitles into video
+              </label>
+            </div>
 
-            <label>Image style strength (0–1)</label>
-            <input name="image_strength" type="number" value="0.7" step="0.05" min="0" max="1" />
+            <div style="margin-bottom: 12px;">
+              <h3 style="margin: 0 0 8px; font-size: 16px;">AI Image Enhancements</h3>
+              <label>Image style</label>
+              <select name="image_style">
+                <option value="none" selected>None (no change)</option>
+                <option value="cinematic">Cinematic</option>
+                <option value="vivid">Vivid</option>
+                <option value="bw">B&W</option>
+              </select>
 
-            <label>
-              <input name="burn_subs" type="checkbox" checked />
-              Burn subtitles into video
-            </label>
+              <label>Image style strength (0–1)</label>
+              <input name="image_strength" type="number" value="0.7" step="0.05" min="0" max="1" />
+            </div>
           </div>
         </div>
 
