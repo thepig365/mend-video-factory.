@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Job {{ job.id }}</title>
+    <style>
+      :root{
+        --bg:#ffffff; --fg:#111827; --muted:#6b7280;
+        --card:#ffffff; --border:#e5e7eb;
+        --link:#2563eb;
+        --btn-bg:#111827; --btn-fg:#ffffff; --btn-border:#111827;
+        --pre-bg:#0b1020; --pre-fg:#e5e7eb;
+      }
+      [data-theme="dark"]{
+        --bg:#0b1220; --fg:#e5e7eb; --muted:#9ca3af;
+        --card:#0f172a; --border:#24314a;
+        --link:#60a5fa;
+        --btn-bg:#e5e7eb; --btn-fg:#0b1220; --btn-border:#e5e7eb;
+        --pre-bg:#050814; --pre-fg:#e5e7eb;
+      }
+      body { font-family: -apple-system, system-ui, sans-serif; margin: 24px; max-width: 980px; background: var(--bg); color: var(--fg); }
+      .topbar{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom: 12px; }
+      .card { border: 1px solid var(--border); background: var(--card); border-radius: 10px; padding: 16px; }
+      .hint { color: var(--muted); font-size: 13px; margin-top: 4px; }
+      pre { background: var(--pre-bg); color: var(--pre-fg); padding: 12px; border-radius: 10px; overflow: auto; }
+      a { color: var(--link); }
+      button.secondary{
+        padding: 8px 10px;
+        font-weight: 700;
+        background: var(--btn-bg); color: var(--btn-fg);
+        border: 1px solid var(--btn-border); border-radius: 10px;
+      }
+    </style>
+    {% if job.status != "done" and job.status != "error" %}
+      <meta http-equiv="refresh" content="2">
+    {% endif %}
+  </head>
+  <body>
+    <div class="topbar">
+      <p style="margin:0;"><a href="/">← New job</a></p>
+      <button class="secondary" id="themeToggle" type="button">Toggle theme</button>
+    </div>
+
+    <h2>Job {{ job.id }} (chapter {{ job.chapter }})</h2>
+    <div class="card">
+      <div><b>Status:</b> {{ job.status }}</div>
+      {% if job.error %}
+        <div style="margin-top: 8px; color: #b91c1c;"><b>Error:</b> {{ job.error }}</div>
+      {% endif %}
+
+      {% if job.status == "done" %}
+        <div style="margin-top: 10px;">
+          <a href="/jobs/{{ job.id }}/video">Download MP4</a>
+          &nbsp;·&nbsp;
+          <a href="/jobs/{{ job.id }}/srt">Download SRT</a>
+        </div>
+        <div class="hint">If you want to regenerate with different subtitle timing, go back and adjust “Subtitles offset”.</div>
+      {% else %}
+        <div class="hint">This page auto-refreshes until the job finishes.</div>
+      {% endif %}
+    </div>
+
+    <h3>Log</h3>
+    <pre>{{ job.log }}</pre>
+
+    <script>
+      (function() {
+        const KEY = "mvf_theme";
+        const root = document.documentElement;
+        const btn = document.getElementById("themeToggle");
+        function preferredTheme() {
+          const saved = localStorage.getItem(KEY);
+          if (saved === "dark" || saved === "light") return saved;
+          return (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+        }
+        function apply(t) {
+          root.setAttribute("data-theme", t);
+          if (btn) btn.textContent = (t === "dark") ? "Dark mode" : "Light mode";
+        }
+        function toggle() {
+          const cur = root.getAttribute("data-theme") || preferredTheme();
+          const next = (cur === "dark") ? "light" : "dark";
+          localStorage.setItem(KEY, next);
+          apply(next);
+        }
+        apply(preferredTheme());
+        if (btn) btn.addEventListener("click", toggle);
+      })();
+    </script>
+  </body>
+</html>
+
+

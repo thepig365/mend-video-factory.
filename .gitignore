@@ -1,0 +1,10 @@
+.env.local
+.env
+chapters/
+voices/
+out/
+tmp/
+/.venv
+__pycache__/
+*.pyc
+.DS_Store

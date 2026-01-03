@@ -1,0 +1,23 @@
+# Optional dependencies for voice-clone TTS via Coqui XTTS v2.
+#
+# Notes:
+# - This is intentionally NOT installed by default, because Torch/TTS are heavy.
+# - Install when you want the Web UI "Generate voice.wav via voice-clone TTS" option:
+#     pip install -r requirements_tts_coqui.txt
+#
+# If pip struggles with torch on your machine, install torch first following
+# PyTorch's official instructions for your macOS / Python version.
+#
+# IMPORTANT:
+# - Coqui TTS currently requires Python < 3.12, so use Python 3.11 for the venv.
+#   Your current venv is Python 3.12, which will show: "No matching distribution found for TTS".
+#
+# Known good versions for XTTS v2 on Python 3.11 (CPU/MPS friendly)
+# IMPORTANT: keep torch/torchaudio pinned together; newer torch 2.9+ breaks Coqui load.
+TTS==0.22.0; python_version < "3.12"
+numpy==1.26.4
+torch==2.1.0
+torchaudio==2.1.0
+transformers==4.33.0
+
+

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.mendvideofactory.web</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>WorkingDirectory</key>
+    <string>__REPO_ROOT__</string>
+
+    <key>ProgramArguments</key>
+    <array>
+      <string>/bin/zsh</string>
+      <string>-lc</string>
+      <string>mkdir -p "__REPO_ROOT__/tmp"; (sleep 2; open "http://127.0.0.1:8000") >/dev/null 2>&amp;1 &amp;; "__REPO_ROOT__/factory.sh" web --no-browser</string>
+    </array>
+
+    <key>StandardOutPath</key>
+    <string>__REPO_ROOT__/tmp/launchagent.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO_ROOT__/tmp/launchagent.err.log</string>
+  </dict>
+</plist>
+
+

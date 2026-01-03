@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mend Video Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 p-8">
+  <div class="max-w-xl mx-auto bg-white dark:bg-slate-800 p-6 rounded shadow">
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <h1 class="text-xl font-semibold mb-2">Mend · Chapter Video Generator</h1>
+        <p class="text-sm text-gray-600 dark:text-slate-300 mb-6">Upload one chapter at a time. Output is a YouTube-ready MP4.</p>
+      </div>
+      <button id="themeToggle" type="button" class="border border-slate-300 dark:border-slate-600 px-3 py-2 rounded font-semibold">
+        Toggle theme
+      </button>
+    </div>
+
+    <form action="/generate" method="post" enctype="multipart/form-data" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium">Chapter (e.g. 01)</label>
+        <input type="text" name="chapter" placeholder="01" class="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-2 rounded" required>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium">Voice (voice.wav)</label>
+        <input type="file" name="voice" accept=".wav" required>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium">Script (script.txt)</label>
+        <input type="file" name="script" accept=".txt" required>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium">Images (jpg/png, multiple)</label>
+        <input type="file" name="images" multiple accept=".jpg,.jpeg,.png" required>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium">Background Music (bgm.wav, optional)</label>
+        <input type="file" name="bgm" accept=".wav">
+        <p class="text-xs text-gray-500 dark:text-slate-300 mt-1">If omitted: uses chapters/&lt;CH&gt;/bgm.wav if present, otherwise assets/bgm.wav.</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium">Image style</label>
+        <select name="image_style" class="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-2 rounded">
+          <option value="none" selected>None (no change)</option>
+          <option value="cinematic">Cinematic</option>
+          <option value="vivid">Vivid</option>
+          <option value="bw">B&W</option>
+        </select>
+        <p class="text-xs text-gray-500 dark:text-slate-300 mt-1">Tip: start with Cinematic + strength 0.7.</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium">Image style strength (0–1)</label>
+        <input type="number" name="image_strength" value="0.7" min="0" max="1" step="0.05" class="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-2 rounded">
+      </div>
+
+      <button class="bg-black text-white px-4 py-2 rounded w-full">
+        Generate Video
+      </button>
+    </form>
+  </div>
+
+  <script>
+    (function() {
+      const KEY = "mvf_theme";
+      const html = document.documentElement;
+      const btn = document.getElementById("themeToggle");
+      function preferredTheme() {
+        const saved = localStorage.getItem(KEY);
+        if (saved === "dark" || saved === "light") return saved;
+        return (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+      }
+      function apply(t) {
+        if (t === "dark") html.classList.add("dark");
+        else html.classList.remove("dark");
+        if (btn) btn.textContent = (t === "dark") ? "Dark mode" : "Light mode";
+      }
+      function toggle() {
+        const cur = html.classList.contains("dark") ? "dark" : "light";
+        const next = (cur === "dark") ? "light" : "dark";
+        localStorage.setItem(KEY, next);
+        apply(next);
+      }
+      apply(preferredTheme());
+      if (btn) btn.addEventListener("click", toggle);
+    })();
+  </script>
+</body>
+</html>
