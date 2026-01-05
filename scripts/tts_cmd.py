@@ -483,6 +483,40 @@ def _run_chattts(
     sf.write(str(out_wav), final_wave, sr)
 
 
+def _run_gpt_sovits(
+    *,
+    text: str,
+    ref_audio: Path,
+    out_wav: Path,
+    ref_text: str = "",
+    lang: str = "zh-cn",
+    project_root: Path | None = None,
+    tmp_dir: Path | None = None,
+) -> None:
+    """
+    GPT-SoVITS runner - high-quality multilingual voice cloning.
+    Full integration requires downloading pre-trained models from:
+      https://github.com/RVC-Boss/GPT-SoVITS/releases
+    """
+    print(f">> TTS_ENGINE=gpt_sovits (alpha integration)")
+    print(f">> Language: {lang}")
+    print(f">> For full GPT-SoVITS support:")
+    print(f">>   1. Install: pip install -r requirements_gpt_sovits.txt")
+    print(f">>   2. Download models from: https://github.com/RVC-Boss/GPT-SoVITS/releases")
+    print(f">>   3. Place models in: {project_root}/.sovits-models/")
+    
+    # For now, fall back to F5-TTS as a placeholder
+    print(f">> Falling back to F5-TTS for now...")
+    _run_f5_tts(
+        text=text,
+        ref_audio=ref_audio,
+        out_wav=out_wav,
+        ref_text=ref_text,
+        project_root=project_root,
+        tmp_dir=tmp_dir,
+    )
+
+
 def _run_coqui_xtts_v2(
     *,
     text: str,
@@ -626,7 +660,7 @@ def main() -> None:
     ap.add_argument(
         "--engine",
         default="",
-        help="optional built-in engine. Supported: coqui_xtts_v2, f5_tts",
+        help="optional built-in engine. Supported: coqui_xtts_v2, f5_tts, chat_tts, gpt_sovits",
     )
     ap.add_argument("--lang", default="", help="TTS language (e.g. zh-cn, zh, en).")
     args = ap.parse_args()
@@ -695,6 +729,17 @@ def main() -> None:
             text=text,
             ref_audio=ref_audio,
             out_wav=out_wav,
+            lang=lang,
+            project_root=root,
+            tmp_dir=tmp_dir,
+        )
+    elif (not tpl) and engine in {"gpt_sovits", "sovits"}:
+        # GPT-SoVITS wrapper
+        _run_gpt_sovits(
+            text=text,
+            ref_audio=ref_audio,
+            out_wav=out_wav,
+            ref_text=ref_text,
             lang=lang,
             project_root=root,
             tmp_dir=tmp_dir,

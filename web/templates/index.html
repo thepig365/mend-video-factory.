@@ -6,22 +6,23 @@
     <title>Mend Video Factory — Web</title>
     <style>
       :root{
-        --bg:#ffffff; --fg:#111827; --muted:#6b7280;
-        --card:#ffffff; --border:#e5e7eb;
-        --input-bg:#ffffff; --input-fg:#111827; --input-border:#d1d5db;
-        --link:#2563eb;
-        --btn-bg:#111827; --btn-fg:#ffffff; --btn-border:#111827;
-        --pre-bg:#0b1020; --pre-fg:#e5e7eb;
-        --success-bg:#f0fdf4; --success-border:#bbf7d0; --success-fg:#14532d;
+        --bg:#ffffff; --fg:#000000; --muted:#666666;
+        --card:#ffffff; --border:#81D8D0;
+        --input-bg:#ffffff; --input-fg:#000000; --input-border:#81D8D0;
+        --link:#008280;
+        --btn-bg:#000000; --btn-fg:#ffffff; --btn-border:#000000;
+        --pre-bg:#f8f8f8; --pre-fg:#000000;
+        --success-bg:#f0fbfb; --success-border:#81D8D0; --success-fg:#004d4b;
+        --tiffany:#81D8D0;
       }
       [data-theme="dark"]{
-        --bg:#0b1220; --fg:#e5e7eb; --muted:#9ca3af;
-        --card:#0f172a; --border:#24314a;
-        --input-bg:#0b1220; --input-fg:#e5e7eb; --input-border:#334155;
-        --link:#60a5fa;
-        --btn-bg:#e5e7eb; --btn-fg:#0b1220; --btn-border:#e5e7eb;
-        --pre-bg:#050814; --pre-fg:#e5e7eb;
-        --success-bg:#052e1a; --success-border:#14532d; --success-fg:#bbf7d0;
+        --bg:#0f1717; --fg:#ffffff; --muted:#a1a1a1;
+        --card:#1a2525; --border:#004d4b;
+        --input-bg:#0f1717; --input-fg:#ffffff; --input-border:#00afad;
+        --link:#81D8D0;
+        --btn-bg:#81D8D0; --btn-fg:#000000; --btn-border:#81D8D0;
+        --pre-bg:#050a0a; --pre-fg:#ffffff;
+        --success-bg:#052e2e; --success-border:#004d4b; --success-fg:#81D8D0;
       }
       body { 
         font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif; 
@@ -58,8 +59,15 @@
       button {
         margin-top: 12px; padding: 8px 16px; font-weight: 600;
         background: var(--btn-bg); color: var(--btn-fg);
-        border: 1px solid var(--btn-border); border-radius: 8px;
+        border: 1px solid var(--btn-border); border-radius: 4px;
         cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 12px;
+        transition: all 0.2s ease;
+      }
+      button:hover {
+        opacity: 0.8;
       }
       button.secondary{
         margin-top: 0;
@@ -313,6 +321,7 @@
                       <option value="coqui_xtts_v2" selected>Coqui XTTS v2 (Recommended)</option>
                       <option value="f5_tts">F5-TTS (High Similarity)</option>
                       <option value="chat_tts">ChatTTS (Prosody Control)</option>
+                      <option value="gpt_sovits">GPT-SoVITS (Premium Quality, Alpha)</option>
                     </select>
                     <div class="hint">ChatTTS supports [laugh], [uv_break] etc.</div>
                   </div>
@@ -369,10 +378,10 @@
             <label>video clips (mp4, select multiple)</label>
             <input name="video_clips" type="file" accept="video/mp4" multiple />
             <div class="hint">MP4 clips will be normalized to 1080p/30fps, audio removed.</div>
+
+            <button type="submit" style="width: 100%; margin-top: 24px; padding: 14px; font-size: 14px; background: var(--btn-bg); color: var(--btn-fg); border: none; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700;">Generate Video</button>
           </div>
         </div>
-
-        <button type="submit">Generate</button>
       </form>
     </div>
     <script>

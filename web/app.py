@@ -30,12 +30,14 @@ VOICES_DIR = ROOT / "voices"  # saved voice profiles (reference samples)
 # Virtual environments for different TTS engines
 VENV_DEFAULT = ROOT / ".venv"
 VENV_CHATTTS = ROOT / ".venv-chattts"
+VENV_SOVITS = ROOT / ".venv-sovits"
 
 
 def _get_python_for_tts_engine(engine: str) -> str:
     """
     Return the correct Python interpreter path based on TTS engine.
     - ChatTTS requires torch>=2.4, transformers>=4.41 -> use .venv-chattts
+    - GPT-SoVITS requires specific deps -> use .venv-sovits
     - Coqui XTTS v2 requires torch==2.1.0 -> use .venv (default)
     - F5-TTS uses the default venv
     """
@@ -44,7 +46,11 @@ def _get_python_for_tts_engine(engine: str) -> str:
         python = VENV_CHATTTS / "bin" / "python"
         if python.exists():
             return str(python)
-        # Fall back if venv not set up
+        return sys.executable
+    elif engine in {"gpt_sovits", "sovits"}:
+        python = VENV_SOVITS / "bin" / "python"
+        if python.exists():
+            return str(python)
         return sys.executable
     else:
         # coqui_xtts_v2, f5_tts, or any other
