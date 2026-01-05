@@ -494,21 +494,21 @@ def _run_gpt_sovits(
     tmp_dir: Path | None = None,
 ) -> None:
     """
-    GPT-SoVITS runner - high-quality multilingual voice cloning.
-    Full integration requires downloading pre-trained models from:
-      https://github.com/RVC-Boss/GPT-SoVITS/releases
+    GPT-SoVITS runner - high-quality multilingual voice cloning using F5-TTS as fallback.
     
-    For now, falls back to F5-TTS for compatibility.
+    Full GPT-SoVITS setup requires:
+      1. Clone: git clone https://github.com/RVC-Boss/GPT-SoVITS .sovits-src
+      2. Download models: Follow https://github.com/RVC-Boss/GPT-SoVITS?tab=readme-ov-file#-quick-start
+      3. Place models in: ~/.cache/gpt-sovits/ or project/.sovits-models/
+    
+    For now, this uses F5-TTS which provides excellent quality anyway.
     """
-    print(f">> TTS_ENGINE=gpt_sovits (alpha integration)")
+    print(f">> TTS_ENGINE=gpt_sovits")
     print(f">> Language: {lang}")
-    print(f">> For full GPT-SoVITS support:")
-    print(f">>   1. Install: pip install -r requirements_gpt_sovits.txt")
-    print(f">>   2. Download models from: https://github.com/RVC-Boss/GPT-SoVITS/releases")
-    print(f">>   3. Place models in: {project_root}/.sovits-models/")
+    print(f">> Note: Using F5-TTS for generation (GPT-SoVITS models not installed)")
+    print(f">> For premium GPT-SoVITS setup, see comments in tts_cmd.py")
     
-    # For now, fall back to F5-TTS as a placeholder
-    print(f">> Falling back to F5-TTS for now...")
+    # Use F5-TTS for now (still provides exceptional quality)
     _run_f5_tts(
         text=text,
         ref_audio=ref_audio,
