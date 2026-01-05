@@ -1,0 +1,8 @@
+chattts
+omegaconf
+vector_quantize_pytorch
+torch
+torchaudio
+numpy<2.0.0
+soundfile
+

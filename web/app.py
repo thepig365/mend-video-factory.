@@ -27,6 +27,32 @@ SCRIPTS_DIR = ROOT / "scripts"
 OUT_DIR = ROOT / "out"
 VOICES_DIR = ROOT / "voices"  # saved voice profiles (reference samples)
 
+# Virtual environments for different TTS engines
+VENV_DEFAULT = ROOT / ".venv"
+VENV_CHATTTS = ROOT / ".venv-chattts"
+
+
+def _get_python_for_tts_engine(engine: str) -> str:
+    """
+    Return the correct Python interpreter path based on TTS engine.
+    - ChatTTS requires torch>=2.4, transformers>=4.41 -> use .venv-chattts
+    - Coqui XTTS v2 requires torch==2.1.0 -> use .venv (default)
+    - F5-TTS uses the default venv
+    """
+    engine = (engine or "").strip().lower()
+    if engine == "chat_tts":
+        python = VENV_CHATTTS / "bin" / "python"
+        if python.exists():
+            return str(python)
+        # Fall back if venv not set up
+        return sys.executable
+    else:
+        # coqui_xtts_v2, f5_tts, or any other
+        python = VENV_DEFAULT / "bin" / "python"
+        if python.exists():
+            return str(python)
+        return sys.executable
+
 security = HTTPBasic()
 
 
@@ -186,6 +212,7 @@ def run_build_job(
     tts_ref_text: str,
     tts_ref_audio_path: str,
     tts_lang: str,
+    tts_engine: str = "coqui_xtts_v2",
 ) -> None:
     job = _jobs[job_id]
     job.status = "running"
@@ -201,7 +228,7 @@ def run_build_job(
                 raise FileNotFoundError(f"Missing uploaded TTS reference audio: {ref_audio}")
 
             tts_cmd = [
-                sys.executable,
+                _get_python_for_tts_engine(tts_engine),
                 str(tts_py),
                 "--project",
                 str(ROOT),
@@ -213,6 +240,8 @@ def run_build_job(
                 str(tts_ref_text or ""),
                 "--lang",
                 str(tts_lang or "zh-cn"),
+                "--engine",
+                str(tts_engine or "coqui_xtts_v2"),
             ]
             exit_code = _run_cmd_realtime(job, tts_cmd)
             if exit_code != 0:
@@ -329,11 +358,12 @@ def create_job(
     chapter: str = Form("01"),
     voice_wav: UploadFile | None = File(None),
     script_txt: UploadFile | None = File(None),
+    script_txt_clone: UploadFile | None = File(None),
     script_text: str = Form(""),
+    script_text_upload: str = Form(""),
     images: list[UploadFile] | None = File(None),
     video_clips: list[UploadFile] | None = File(None),
     bgm_wav: UploadFile | None = File(None),
-    # Optional voice-clone TTS (generates voice.wav from script + reference audio)
     tts_enabled: bool = Form(False),
     tts_ref_audio: UploadFile | None = File(None),
     tts_ref_text: str = Form(""),
@@ -342,13 +372,14 @@ def create_job(
     burn_subs: bool = Form(True),
     minutes: int = Form(0),
     desired_slide_sec: int = Form(25),
-    bgm_volume: float = Form(0.22),
+    bgm_volume: float = Form(0.35),
     subs_offset_sec: float = Form(2.85),
     sub_font_size: int = Form(16),
     subs_from: str = Form("script"),
     whisper_model: str = Form("small"),
     whisper_lang: str = Form("auto"),
     tts_lang: str = Form("zh-cn"),
+    tts_engine: str = Form("coqui_xtts_v2"),
     image_style: str = Form("none"),
     image_strength: float = Form(0.7),
 ) -> RedirectResponse:
@@ -372,33 +403,35 @@ def create_job(
             raise HTTPException(status_code=400, detail="Please upload voice.wav (or enable TTS)")
         # Prevent accidentally reusing an old voice.wav if user reuses the same chapter id.
         try:
-            (ch_dir / "voice.wav").unlink(missing_ok=True)  # py3.8+ supports missing_ok
+            (ch_dir / "voice.wav").unlink(missing_ok=True)
         except TypeError:
-            # Fallback for older Python (shouldn't happen in this project, but keep it safe)
             p = ch_dir / "voice.wav"
             if p.exists():
                 p.unlink()
 
-    # Script text is used for:
-    # - TTS generation (when enabled)
-    # - Subtitles (when subs_from=script)
-    script_text_in = (script_text or "").strip()
+    # Script text
+    if bool(tts_enabled):
+        if script_txt_clone and script_txt_clone.filename:
+            _save_upload(ch_dir / "script.txt", script_txt_clone)
+            script_text_in = ""
+        else:
+            script_text_in = (script_text or "").strip()
+    else:
+        script_text_in = (script_text_upload or "").strip()
+
     if script_txt and script_txt.filename:
         _save_upload(ch_dir / "script.txt", script_txt)
     elif script_text_in:
         (ch_dir / "script.txt").write_text(script_text_in, encoding="utf-8")
-    else:
-        # If TTS is enabled, we must have text to synthesize.
+    elif not (ch_dir / "script.txt").exists():
         if bool(tts_enabled):
-            raise HTTPException(status_code=400, detail="TTS enabled: please upload script.txt or paste Script text")
-        # Otherwise allow missing script (builder can still run; Whisper subs is recommended).
+            raise HTTPException(status_code=400, detail="TTS enabled: please upload a .txt file or paste script text")
         (ch_dir / "script.txt").write_text("", encoding="utf-8")
 
     if images:
         for up in images:
             if not up.filename:
                 continue
-            # Keep filename, but strip path separators just in case
             name = Path(up.filename).name
             _save_upload(img_dir / name, up)
 
@@ -417,11 +450,10 @@ def create_job(
     if not has_images and not has_clips:
         raise HTTPException(status_code=400, detail="Please upload images or mp4 clips.")
 
-    # Optional per-chapter bgm.wav (if omitted, we'll use existing chapters/<CH>/bgm.wav or fallback assets/bgm.wav)
     if bgm_wav and bgm_wav.filename:
         _save_upload(ch_dir / "bgm.wav", bgm_wav)
 
-    # Optional: save reference audio for TTS (kept under tmp/ so it doesn't pollute chapters/)
+    # Optional: save reference audio for TTS
     tmp_ch_dir = ROOT / "tmp" / chapter_id
     tmp_ch_dir.mkdir(parents=True, exist_ok=True)
     tts_ref_audio_path = ""
@@ -429,15 +461,12 @@ def create_job(
         profile = (tts_voice_profile or "").strip()
         save_as = (tts_save_profile_as or "").strip()
 
-        # Case A: user selected an existing profile -> use it
         if profile:
             try:
                 ref = resolve_profile_audio(profile).resolve()
             except Exception as e:
                 raise HTTPException(status_code=400, detail=str(e))
             tts_ref_audio_path = str(ref)
-
-        # Case B: use uploaded reference audio
         else:
             if not tts_ref_audio or not tts_ref_audio.filename:
                 raise HTTPException(
@@ -449,7 +478,6 @@ def create_job(
             _save_upload(dst, tts_ref_audio)
             tts_ref_audio_path = str(dst.resolve())
 
-            # Optional: save upload as a reusable profile
             if save_as:
                 try:
                     name = safe_profile_name(save_as)
@@ -485,6 +513,7 @@ def create_job(
         str(tts_ref_text),
         str(tts_ref_audio_path),
         str(tts_lang),
+        str(tts_engine),
     )
 
     return RedirectResponse(url=f"/jobs/{job_id}", status_code=303)
@@ -519,5 +548,3 @@ def job_srt(job_id: str) -> FileResponse:
     if not job or job.status != "done" or not job.output_srt:
         raise FileNotFoundError("srt not ready")
     return FileResponse(path=str(job.output_srt), media_type="application/x-subrip", filename=job.output_srt.name)
-
-

@@ -74,6 +74,13 @@ if [[ "${TTS_ENGINE:-}" == "coqui_xtts_v2" || "${TTS_ENGINE:-}" == "xtts_v2" || 
   fi
 fi
 
+if [[ "${TTS_ENGINE:-}" == "chat_tts" || "${TTS_ENGINE:-}" == "chattts" ]]; then
+  if [[ -f "$ROOT_DIR/requirements_tts_chattts.txt" ]]; then
+    echo ">> TTS_ENGINE=${TTS_ENGINE} → Installing optional ChatTTS deps..."
+    "$PY" -m pip install -r requirements_tts_chattts.txt
+  fi
+fi
+
 case "$MODE" in
   web)
     # Choose a port. Default 8000, but auto-fallback if busy.

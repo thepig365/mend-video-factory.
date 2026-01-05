@@ -1060,6 +1060,11 @@ def main() -> None:
     # If user provided clips/*.mp4, prefer them (e.g. Luma outputs).
     input_clips = collect_video_clips(clips_dir)
     clips: List[Path] = []
+    # For final summary
+    clips_used_count = 0
+    source_images_count = 0
+    slides_used_count = 0
+    per_slide_sec = 0.0
 
     if input_clips:
         # Normalize and loop clips to cover the narration duration.
@@ -1099,6 +1104,7 @@ def main() -> None:
             normalize_clip_for_concat(src, out, trim_sec=trim)
             clips.append(out)
             t_left -= trim
+        clips_used_count = len(clips)
 
     else:
         imgs = collect_images(images_dir)
@@ -1126,6 +1132,9 @@ def main() -> None:
                 image_strength=float(args.image_strength),
             )
             clips.append(clip_path)
+        source_images_count = len(imgs)
+        slides_used_count = len(slides)
+        per_slide_sec = per
 
     # Concatenate
     video_noaudio = tmp_dir / "video_noaudio.mp4"
@@ -1159,7 +1168,10 @@ def main() -> None:
     print("Video:", final_mp4)
     print("SRT:", srt_path)
     print(f"Duration: {total_sec:.2f}s (voice={voice_sec:.2f}s, min={min_sec:.2f}s)")
-    print(f"Images: source={len(imgs)}, slides_used={len(slides)}, per_slide={per:.1f}s")
+    if input_clips:
+        print(f"Clips used: {clips_used_count}")
+    else:
+        print(f"Images: source={source_images_count}, slides_used={slides_used_count}, per_slide={per_slide_sec:.1f}s")
 
 
 if __name__ == "__main__":

@@ -4,7 +4,9 @@ chapters/
 voices/
 out/
 tmp/
-/.venv
+.venv/
+.venv-*/
+.cursor/
 __pycache__/
 *.pyc
 .DS_Store

@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 import argparse
+import re
 import subprocess
 from pathlib import Path
+
+def is_valid_chapter_id(name: str) -> bool:
+    """Check if directory name is a valid chapter ID (matches safe_id pattern)."""
+    return bool(re.fullmatch(r"[A-Za-z0-9_-]{1,40}", name))
 
 def main():
     ap = argparse.ArgumentParser()
@@ -21,7 +26,8 @@ def main():
     if args.chapters and len(args.chapters) > 0:
         chapters = args.chapters
     else:
-        chapters = sorted([p.name for p in chapters_dir.iterdir() if p.is_dir() and p.name.isdigit()])
+        # Accept any valid chapter ID (alphanumeric, underscore, dash)
+        chapters = sorted([p.name for p in chapters_dir.iterdir() if p.is_dir() and is_valid_chapter_id(p.name)])
 
     if not chapters:
         raise RuntimeError("No chapters found under ./chapters")
