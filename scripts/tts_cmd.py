@@ -497,6 +497,8 @@ def _run_gpt_sovits(
     GPT-SoVITS runner - high-quality multilingual voice cloning.
     Full integration requires downloading pre-trained models from:
       https://github.com/RVC-Boss/GPT-SoVITS/releases
+    
+    For now, falls back to F5-TTS for compatibility.
     """
     print(f">> TTS_ENGINE=gpt_sovits (alpha integration)")
     print(f">> Language: {lang}")

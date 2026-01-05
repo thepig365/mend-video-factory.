@@ -37,9 +37,11 @@ def _get_python_for_tts_engine(engine: str) -> str:
     """
     Return the correct Python interpreter path based on TTS engine.
     - ChatTTS requires torch>=2.4, transformers>=4.41 -> use .venv-chattts
-    - GPT-SoVITS requires specific deps -> use .venv-sovits
+    - GPT-SoVITS requires specific deps -> use .venv-sovits (when full version installed)
     - Coqui XTTS v2 requires torch==2.1.0 -> use .venv (default)
     - F5-TTS uses the default venv
+    
+    Note: GPT-SoVITS alpha currently falls back to F5-TTS, so use default venv.
     """
     engine = (engine or "").strip().lower()
     if engine == "chat_tts":
@@ -47,17 +49,17 @@ def _get_python_for_tts_engine(engine: str) -> str:
         if python.exists():
             return str(python)
         return sys.executable
-    elif engine in {"gpt_sovits", "sovits"}:
-        python = VENV_SOVITS / "bin" / "python"
-        if python.exists():
-            return str(python)
-        return sys.executable
-    else:
-        # coqui_xtts_v2, f5_tts, or any other
-        python = VENV_DEFAULT / "bin" / "python"
-        if python.exists():
-            return str(python)
-        return sys.executable
+    # For now, GPT-SoVITS falls back to F5-TTS, so use default venv
+    # When full GPT-SoVITS is installed, uncomment below:
+    # elif engine in {"gpt_sovits", "sovits"}:
+    #     python = VENV_SOVITS / "bin" / "python"
+    #     if python.exists():
+    #         return str(python)
+    # All others use default venv
+    python = VENV_DEFAULT / "bin" / "python"
+    if python.exists():
+        return str(python)
+    return sys.executable
 
 security = HTTPBasic()
 
